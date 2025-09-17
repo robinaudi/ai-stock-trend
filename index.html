@@ -1,44 +1,183 @@
-import React from "react";
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI 企業股價趨勢分析</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body{ background: radial-gradient(1200px 600px at 50% -10%, rgba(99,102,241,.25), transparent 60%), #0b1220; }
+  </style>
+</head>
+<body class="text-slate-100 antialiased">
+  <header class="border-b border-white/10 bg-white/5 backdrop-blur sticky top-0 z-10">
+    <div class="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="h-6 w-6 rounded bg-gradient-to-br from-cyan-400 to-indigo-500"></div>
+        <span class="font-semibold">AI 企業股價趨勢分析</span>
+      </div>
+      <a href="https://www.alphavantage.co" target="_blank" class="text-xs text-slate-300 hover:text-white">Data: Alpha Vantage</a>
+    </div>
+  </header>
 
-export default function StockAIHero() {
-  return (
-    <div className="min-h-screen w-full bg-[#F6F7FB] text-neutral-900">
-      <div className="mx-auto max-w-5xl px-6 pt-20 pb-24">
-        {/* Title */}
-        <h1 className="text-[48px] leading-tight font-black tracking-tight text-[#0E1A2B] text-center">
-          AI 企業股價趨勢分析
-        </h1>
+  <main class="max-w-6xl mx-auto px-6 py-10">
+    <section class="text-center">
+      <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight">
+        <span class="bg-gradient-to-r from-cyan-400 to-indigo-400 bg-clip-text text-transparent">AI Stock Insight</span>
+      </h1>
+      <p class="mt-4 text-slate-300 text-lg">輸入公司或代碼，取得近五日趨勢與昨日收盤變動。</p>
+    </section>
 
-        {/* Subtitle */}
-        <p className="mt-6 text-center text-[28px] leading-[1.6] text-[#26384E]">
-          輸入公司名稱或股票代碼，AI 將為您分析近期股價趨勢、基本面與市場情緒。
-        </p>
-
-        {/* API Key */}
-        <div className="mt-8 flex items-center justify-center">
-          <div className="w-full max-w-[980px] rounded-xl bg-white shadow-sm ring-1 ring-black/5 p-4 flex items-center gap-3">
-            <label className="shrink-0 text-sm text-neutral-600">Alpha Vantage API Key</label>
-            <input type="password" placeholder="輸入或貼上您的 API Key" className="w-full bg-transparent px-3 py-2 rounded-md border border-neutral-200 focus:outline-none" />
-            <button className="rounded-md bg-neutral-900 text-white px-4 py-2 text-sm">Save</button>
-          </div>
+    <section class="mt-10 grid gap-5 lg:grid-cols-[1fr,2fr] items-start">
+      <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
+        <h2 class="text-sm font-semibold text-slate-200">API Key</h2>
+        <p class="text-xs text-slate-400 mt-1">僅儲存在瀏覽器本機（localStorage）。可至 Alpha Vantage 免費申請。</p>
+        <div class="mt-3 flex gap-2">
+          <input id="apiKey" type="password" placeholder="貼上 Alpha Vantage API Key"
+                 class="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/50">
+          <button id="saveKey" class="rounded-lg bg-gradient-to-r from-cyan-500 to-indigo-500 px-4 text-sm font-semibold">Save</button>
         </div>
+        <div id="keySaved" class="hidden mt-2 text-xs text-emerald-300">已儲存至本機。</div>
+      </div>
 
-        {/* Search Bar */}
-        <div className="mt-6 flex items-center justify-center">
-          <div className="flex w-full max-w-[980px] items-center rounded-full bg-white shadow-sm ring-1 ring-black/5">
-            <input type="text" defaultValue="特斯拉" className="w-full rounded-l-full bg-transparent px-8 py-6 text-lg focus:outline-none" placeholder="輸入公司或代碼" />
-            <button className="m-2 inline-flex items-center justify-center rounded-full bg-[#165DFF] px-8 py-4 text-white text-xl font-semibold" aria-label="開始分析">開始分析</button>
-          </div>
+      <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
+        <div class="flex items-center rounded-xl bg-white/5 border border-white/10">
+          <input id="queryInput" type="text" value="TSLA"
+                 class="w-full bg-transparent px-4 py-3 text-base placeholder:text-slate-400 focus:outline-none"
+                 placeholder="輸入代碼或名稱（例：TSLA, NVDA, TSM）">
+          <button id="analyzeBtn"
+            class="m-1 rounded-lg bg-gradient-to-r from-cyan-500 to-indigo-500 px-5 py-2.5 font-semibold">開始分析</button>
         </div>
+        <div class="mt-3 text-sm text-slate-300">
+          或試試：
+          <button class="example underline decoration-dotted hover:text-white" data-symbol="TSLA">TSLA</button>、
+          <button class="example underline decoration-dotted hover:text-white" data-symbol="NVDA">NVDA</button>、
+          <button class="example underline decoration-dotted hover:text-white" data-symbol="TSM">TSM</button>
+        </div>
+        <div id="result" class="mt-6"></div>
+      </div>
+    </section>
+  </main>
 
-        {/* Examples */}
-        <div className="mt-6 text-center text-xl text-[#4A5B73]">
-          或試試範例：
-          <a href="#" className="mx-2 font-semibold text-[#165DFF] hover:underline">台積電</a>
-          <a href="#" className="mx-2 font-semibold text-[#165DFF] hover:underline">NVIDIA</a>
-          <a href="#" className="mx-2 font-semibold text-[#165DFF] hover:underline">鴻海</a>
+  <template id="card-template">
+    <div class="rounded-2xl bg-white/5 border border-white/10 p-6">
+      <div class="flex items-start justify-between gap-6">
+        <div>
+          <h3 class="text-xl font-bold" data-sym></h3>
+          <p class="text-xs text-slate-400 mt-1" data-date></p>
+        </div>
+        <div class="text-right">
+          <div class="text-3xl font-extrabold" data-close></div>
+          <div class="text-sm font-semibold" data-pct></div>
         </div>
       </div>
+      <div class="mt-4 text-sm text-slate-300">5-Day Trend: <span data-trend class="font-semibold"></span></div>
+      <div class="mt-4"><svg width="100%" height="72" viewBox="0 0 480 72" data-spark></svg></div>
     </div>
-  );
-}
+  </template>
+
+<script>
+(function(){
+  const $ = (s, r=document) => r.querySelector(s);
+  const apiKey = $('#apiKey');
+  const saveKey = $('#saveKey');
+  const saved = $('#keySaved');
+  const q = $('#queryInput');
+  const btn = $('#analyzeBtn');
+  const res = $('#result');
+
+  apiKey.value = localStorage.getItem('av_api_key') || '';
+  const last = localStorage.getItem('last_query') || 'TSLA';
+  q.value = last;
+
+  saveKey.addEventListener('click', () => {
+    localStorage.setItem('av_api_key', apiKey.value.trim());
+    saved.classList.remove('hidden');
+    setTimeout(() => saved.classList.add('hidden'), 1500);
+  });
+
+  document.querySelectorAll('.example').forEach(b => b.addEventListener('click', () => {
+    q.value = b.dataset.symbol;
+    run();
+  }));
+
+  btn.addEventListener('click', run);
+  q.addEventListener('keydown', e => { if(e.key==='Enter') run(); });
+
+  function loading() {
+    res.innerHTML = `
+      <div class="rounded-2xl bg-white/5 border border-white/10 p-6 animate-pulse">
+        <div class="h-6 w-40 bg-white/10 rounded mb-2"></div>
+        <div class="h-4 w-28 bg-white/10 rounded"></div>
+        <div class="h-10 w-full bg-white/10 rounded mt-4"></div>
+      </div>`;
+  }
+  function error(msg) {
+    res.innerHTML = `<div class="rounded-xl border border-red-400/30 bg-red-500/10 text-red-200 p-4 text-sm">錯誤：${escapeHtml(msg)}</div>`;
+  }
+
+  async function run(){
+    const key = apiKey.value.trim();
+    const input = q.value.trim();
+    if(!key){ error('請先設定 API Key'); return; }
+    if(!input){ return; }
+
+    localStorage.setItem('last_query', input);
+    loading();
+
+    const map = { '特斯拉':'TSLA','台積電':'TSM','NVIDIA':'NVDA','輝達':'NVDA','鴻海':'2317.TW' };
+    const symbol = map[input] || input.toUpperCase();
+
+    try {
+      const url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${encodeURIComponent(symbol)}&outputsize=compact&apikey=${encodeURIComponent(key)}`;
+      const resp = await fetch(url);
+      const data = await resp.json();
+      const ts = data['Time Series (Daily)'];
+      if(!ts){ error(data['Note'] || data['Error Message'] || 'API 回應異常或頻率限制'); return; }
+
+      const dates = Object.keys(ts).sort().reverse();
+      const latest = ts[dates[0]], prev = ts[dates[1]];
+      const closeNow = +latest['4. close'], closePrev = +prev['4. close'];
+      const pct = ((closeNow - closePrev)/closePrev)*100;
+
+      const last5 = dates.slice(0,5).map(d => +ts[d]['4. close']);
+      const trendPct = ((last5[0]-last5[4])/(last5[4]||1))*100;
+
+      render(symbol, dates[0], closeNow, pct, trendPct, last5);
+    } catch(e){
+      error('發生錯誤，請稍後重試');
+      console.error(e);
+    }
+  }
+
+  function render(sym, date, close, pct, trendPct, last5){
+    const tpl = document.getElementById('card-template').content.cloneNode(true);
+    tpl.querySelector('[data-sym]').textContent = sym;
+    tpl.querySelector('[data-date]').textContent = `Last trading day: ${date}`;
+    tpl.querySelector('[data-close]').textContent = close.toFixed(2);
+    const p = tpl.querySelector('[data-pct]');
+    p.textContent = `${pct.toFixed(2)}%`;
+    p.className = 'text-sm font-semibold ' + (pct>=0 ? 'text-emerald-300' : 'text-rose-300');
+    const t = tpl.querySelector('[data-trend]');
+    t.textContent = `${trendPct.toFixed(2)}%`;
+    t.className = 'font-semibold ' + (trendPct>=0 ? 'text-emerald-300' : 'text-rose-300');
+
+    const svg = tpl.querySelector('[data-spark]');
+    const w=480,h=72,pad=8;
+    const min = Math.min(...last5), max = Math.max(...last5);
+    const pts = last5.map((v,i)=>{
+      const x = pad + i*(w-2*pad)/(last5.length-1);
+      const y = h-pad - ((v-min)/(max-min || 1))*(h-2*pad);
+      return [x,y];
+    });
+    const path = 'M ' + pts.map(p=>p.join(' ')).join(' L ');
+    svg.innerHTML = `<path d="${path}" fill="none" stroke="currentColor" stroke-width="2"/>`;
+
+    res.innerHTML = '';
+    res.appendChild(tpl);
+  }
+  function escapeHtml(s){ return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+})();
+</script>
+</body>
+</html>
